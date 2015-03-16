@@ -113,3 +113,16 @@ c:\Windows\Temp
 [E]
 |<-
 ```
+
+## Author
+```
+William Tan
+william.tan@crowdstrike.com
+```
+
+## References
+* https://github.com/MITRECND/chopshop
+* https://github.com/MITRECND/htpy
+* http://www.mitre.org/capabilities/cybersecurity/overview/cybersecurity-blog/decrypting-ssl-with-chopshop
+* https://www.fireeye.com/content/dam/legacy/resources/pdfs/fireeye-china-chopper-report.pdf
+* http://informationonsecurity.blogspot.com/2012/11/china-chopper-webshell.html
