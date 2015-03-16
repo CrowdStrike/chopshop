@@ -24,13 +24,17 @@ Options:
 
 ## Usage Examples:
 
-Run webshell_chopper_decode module and save output.
+Run webshell_chopper_decode module for ssl traffic and save output.
 ```
 ./chopshop –f chopper_traffic_ssl.pcap "chop_ssl -k privatekeyrsa.key | http | webshell_chopper_decode" > decoded_commands.txt
 ```
 Run webshell_chopper_decode module and carve out any PE files seen in sessions.
 ```
 ./chopshop -s . –f chopper_traffic_ssl.pcap "chop_ssl -k privatekeyrsa.key | http | webshell_chopper_decode –x"
+```
+Run webshell_chopper_decode module for plain http Chopper traffic and only show commands.
+```
+./chopshop –f chopper_traffic_http.pcap "http | webshell_chopper_decode -c"
 ```
 
 * Private Key should be in RSA format eg.:
