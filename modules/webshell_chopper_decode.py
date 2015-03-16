@@ -10,6 +10,7 @@ import base64
 import os, time, re, csv, datetime
 import urlparse
 import urllib2
+import binascii
 
 moduleName="webshell_chopper_decode"
 moduleVersion="0.1"
@@ -27,12 +28,15 @@ def init(module_data):
     	dest="commands_output", default=False, help="Only output chopper commands")
     parser.add_option("-o", "--outputs_only", action="store_true", 
     	dest="outputs_output",default=False, help="Only output chopper responses")
+    parser.add_option("-x", "--extract_pe", action="store_true", 
+    	dest="extract_pe",default=False, help="Attempts to extract pe files from session")
 
     (options,lo) = parser.parse_args(module_data['args'])
 
     module_data['dict_output'] = options.dict_output
     module_data['commands_output'] = options.commands_output
     module_data['outputs_output'] = options.outputs_output
+    module_data['extract_pe'] = options.extract_pe
 
     return module_options
 
@@ -56,11 +60,28 @@ def handleProtocol(protocol):
 			parsed_chopper_commands = dict((k, v) for k, v in chopper_commands.iteritems() if v is not None)
 			chop.prnt(parsed_chopper_commands)
 			chop.prnt(chopper_outputs)
+
 	else:
 		if chopper_commands is None:
 			pass
 		else:
 			parsed_chopper_commands = dict((k, v) for k, v in chopper_commands.iteritems() if v is not None)
+
+			if module_data['extract_pe']:
+				filename = "chopper_extracted_file"
+				filename_count = 1
+				for value in parsed_chopper_commands.itervalues():
+					if str(value).startswith("4D5A") and ("40000000" in value):
+						binary_data = binascii.unhexlify(value)
+						chop.savefile("%s-%i.bin" % (filename,filename_count), binary_data)
+						chop.prnt("%s-%i.bin saved.." % (filename,filename_count))
+						filename_count+=1
+				for value in chopper_outputs.itervalues():
+					if str(value).startswith("4D5A") and ("40000000" in value):
+						binary_data = binascii.unhexlify(value)
+						chop.savefile("%s-%i.bin" % (filename,filename_count), binary_data)
+						chop.prnt("%s-%i.bin saved.." % (filename,filename_count))
+						filename_count+=1
 
 			if not module_data['outputs_output']:
 				try:
@@ -99,6 +120,7 @@ def handleProtocol(protocol):
 					pass
 				else:
 					pass
+
 	return
 
 def parseChopperCommands(data):
@@ -172,7 +194,7 @@ def parseChopperCommands(data):
 		if (z0 or z1 or z2 or evalParameter) is None:
 			pass
 		else:
-			chopperCommandsDecoded = {'timestamp':timestamp, 'host':request_host, 'eval':evalParameter, 'z0':z0, 'z1':z1, 'z2':z2}
+			chopperCommandsDecoded = {'timestamp':timestamp, 'host':request_host, 'eval':evalParameter, 'z0':z0, 'z1':z1, 'z2':z2} 
 
 		# Start Parsing Output
 		if ("->|" or "|<-") in response_body:
