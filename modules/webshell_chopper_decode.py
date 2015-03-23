@@ -13,7 +13,7 @@ import urllib2
 import binascii
 
 moduleName="webshell_chopper_decode"
-moduleVersion="0.1"
+moduleVersion="0.2"
 minimumChopLib="4.0"
 
 def module_info():
@@ -30,6 +30,8 @@ def init(module_data):
     	dest="outputs_output",default=False, help="Only output chopper responses")
     parser.add_option("-x", "--extract_pe", action="store_true", 
     	dest="extract_pe",default=False, help="Attempts to extract pe files from session")
+    parser.add_option("-e", "--hex_encoded", action="store_true", 
+    	dest="hex_encoded",default=False, help="Attempts to extract pe files from session")
 
     (options,lo) = parser.parse_args(module_data['args'])
 
@@ -37,6 +39,7 @@ def init(module_data):
     module_data['commands_output'] = options.commands_output
     module_data['outputs_output'] = options.outputs_output
     module_data['extract_pe'] = options.extract_pe
+    module_data['hex_encoded'] = options.hex_encoded
 
     return module_options
 
@@ -48,8 +51,8 @@ def handleProtocol(protocol):
 	module_data = protocol.module_data
 
 	timestamp = time.strftime('%Y-%m-%d %H:%M:%S UTC', time.localtime(protocol.timestamp))
-	data = {'request': protocol.clientData, 'response': protocol.serverData, 'timestamp': timestamp}
-	
+	data = {'request': protocol.clientData, 'response': protocol.serverData, 'timestamp': timestamp, 'module_data': protocol.module_data}
+
 	chopper_commands, chopper_outputs = parseChopperCommands(data)
 
 	if module_data['dict_output']:
@@ -139,7 +142,6 @@ def parseChopperCommands(data):
 	evalParameters, chopperCommandsDecoded = None, None
 	z0,z1,z2,evalParameter = None, None, None, None
 
-	# TODO: add parameter for chopper password?
 	if request_method == 'POST':
 		try:
 			evalParameters = getEvalParameter(request_body)
@@ -150,57 +152,100 @@ def parseChopperCommands(data):
 
 		chopperZParameters = urlparse.parse_qs(request_body[request_body.find('&'):])
 
-		try:
-			# Try to decode z0 parameter as base64
-			z0 = urllib2.unquote(''.join(chopperZParameters.get("z0"))).decode('base64')
-			try:
-				# Check if decoded parameter was actually orginally base64, if it wasn't then it probably won't be ascii.
-				z0.decode('ascii')
-			except UnicodeDecodeError:
-				# If decoded parameter wasn't orginally base64 keep original value
-				z0 = ''.join(chopperZParameters.get("z0"))
-		except:
-			try:
-				# If decode as base64 fails, keep original value of z0
-				z0 = ''.join(chopperZParameters.get("z0"))
-			except:
-				# If z0 doesn't exist then move on
-				pass
-
-		try:	
-			z1 = urllib2.unquote(''.join(chopperZParameters.get("z1"))).decode('base64')
-			try:
-				z1.decode('ascii')
-			except UnicodeDecodeError:
-				z1 = ''.join(chopperZParameters.get("z1"))
-		except:
-			try:
-				z1 = ''.join(chopperZParameters.get("z1"))
-			except:
-				pass
-
-		try:
-			z2 = urllib2.unquote(''.join(chopperZParameters.get("z2"))).decode('base64')
-			try:
-				z2.decode('ascii')
-			except UnicodeDecodeError:
-				z2 = ''.join(chopperZParameters.get("z2"))
-		except:
-			try:
-				z2 = ''.join(chopperZParameters.get("z2"))
-			except:
-				pass
+		if data['module_data']['hex_encoded']:
+			z0, z1 ,z2 = decodeHexParameters(chopperZParameters)
+		else:
+			z0, z1, z2 = decodeBase64Parameters(chopperZParameters)
 
 		if (z0 or z1 or z2 or evalParameter) is None:
 			pass
 		else:
-			chopperCommandsDecoded = {'timestamp':timestamp, 'host':request_host, 'eval':evalParameter, 'z0':z0, 'z1':z1, 'z2':z2} 
+			chopperCommandsDecoded = {'timestamp':timestamp, 'host':request_host, 'eval':evalParameter, 'z0':z0, 'z1':z1, 'z2':z2}
 
 		# Start Parsing Output
 		if ("->|" or "|<-") in response_body:
 			chopperOutputDecoded = {'output':response_body, 'status':response_status, 'timestamp':timestamp}
 
 	return (chopperCommandsDecoded, chopperOutputDecoded)
+
+def decodeBase64Parameters(chopperZParameters):
+
+	z0,z1,z2 = None, None, None
+
+	try:
+		# Try to decode z0 parameter as base64
+		z0 = urllib2.unquote(''.join(chopperZParameters.get("z0"))).decode('base64')
+		try:
+			# Check if decoded parameter was actually orginally base64, if it wasn't then it probably won't be ascii.
+			z0.decode('ascii')
+		except UnicodeDecodeError:
+			# If decoded parameter wasn't orginally base64 keep original value
+			z0 = ''.join(chopperZParameters.get("z0"))
+	except:
+		try:
+			# If decode as base64 fails, keep original value of z0
+			z0 = ''.join(chopperZParameters.get("z0"))
+		except:
+			# If z0 doesn't exist then move on
+			pass
+
+	try:	
+		z1 = urllib2.unquote(''.join(chopperZParameters.get("z1"))).decode('base64')
+		try:
+			z1.decode('ascii')
+		except UnicodeDecodeError:
+			z1 = ''.join(chopperZParameters.get("z1"))
+	except:
+		try:
+			z1 = ''.join(chopperZParameters.get("z1"))
+		except:
+			pass
+
+	try:
+		z2 = urllib2.unquote(''.join(chopperZParameters.get("z2"))).decode('base64')
+		try:
+			z2.decode('ascii')
+		except UnicodeDecodeError:
+			z2 = ''.join(chopperZParameters.get("z2"))
+	except:
+		try:
+			z2 = ''.join(chopperZParameters.get("z2"))
+		except:
+			pass
+
+	return (z0, z1, z2)
+
+def decodeHexParameters(chopperZParameters):
+
+	z0,z1,z2 = None, None, None
+
+	try:
+		# Try to decode z0 parameter as hex
+		z0 = urllib2.unquote(''.join(chopperZParameters.get("z0"))).decode('hex')
+	except:
+		try:
+			# If decode as hex decode fails, keep original value of z0
+			z0 = urllib2.unquote(''.join(chopperZParameters.get("z0")))
+		except:
+			pass
+
+	try:
+		z1 = urllib2.unquote(''.join(chopperZParameters.get("z1"))).decode('hex')
+	except:
+		try:
+			z1 = urllib2.unquote(''.join(chopperZParameters.get("z1")))
+		except:
+			pass
+
+	try:
+		z2 = urllib2.unquote(''.join(chopperZParameters.get("z2"))).decode('hex')
+	except:
+		try:
+			z2 = urllib2.unquote(''.join(chopperZParameters.get("z2")))
+		except:
+			pass
+
+	return (z0, z1, z2)
 
 def getEvalParameter(requestBody):
 	result = re.findall(r'FromBase64String\("(.*?)"\)', requestBody)
