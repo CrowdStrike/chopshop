@@ -121,7 +121,7 @@ william.tan@crowdstrike.com
 ```
 
 ## References
-* blog.crowdstrike.com/chopping-packets-decoding-china-chopper-web-shell-traffic-over-ssl/
+* http://blog.crowdstrike.com/chopping-packets-decoding-china-chopper-web-shell-traffic-over-ssl/
 * https://github.com/MITRECND/chopshop
 * https://github.com/MITRECND/htpy
 * http://www.mitre.org/capabilities/cybersecurity/overview/cybersecurity-blog/decrypting-ssl-with-chopshop
