@@ -20,7 +20,7 @@ Options:
 * Grab and Set up MITRE's ChopShop network decoder framework from https://github.com/MITRECND/chopshop
 * Chopshop's HTTP module requires Python library htpy, you can grab it on MITRE's Github https://github.com/MITRECND/htpy 
 * Installing modules are simple, just copy over the ChopShop module `webshell_chopper_decode.py` file to ChopShop's modules directory. 
-* Note although the `chop_ssl.py` SSL decoder module is included in the default ChopShop installation, I've had some issues running it aganist certain PCAPs that had SSL reconds spanning multiple TCP segments. I've included a modified verison of the "chop_ssl.py" module with minor changes to ensure it bypasses these errors.
+* Note although the `chop_ssl.py` SSL decoder module is included in the default ChopShop installation, I've had some issues running it against certain PCAPs that had SSL reconds spanning multiple TCP segments. I've included a modified verison of the "chop_ssl.py" module with minor changes to ensure it bypasses these errors.
 
 ## Usage Examples:
 
