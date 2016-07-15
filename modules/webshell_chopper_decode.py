@@ -31,7 +31,7 @@ def init(module_data):
     parser.add_option("-x", "--extract_pe", action="store_true", 
     	dest="extract_pe",default=False, help="Attempts to extract pe files from session")
     parser.add_option("-e", "--hex_encoded", action="store_true", 
-    	dest="hex_encoded",default=False, help="Attempts to extract pe files from session")
+    	dest="hex_encoded",default=False, help="Use flag if parameters are hex encoded")
 
     (options,lo) = parser.parse_args(module_data['args'])
 
