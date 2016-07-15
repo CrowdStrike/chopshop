@@ -25,7 +25,7 @@ Installion instructions
 
 * Since OWA sessions are over SSL, you will need the private key of the OWA serer in RSA format to decode the traffic. 
 
-- Private Key should be in RSA format eg.
+- Private Key should be in RSA format saved to a text file eg. 
 ::
 
   -----BEGIN RSA PRIVATE KEY-----
