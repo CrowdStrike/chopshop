@@ -1,4 +1,4 @@
-.. _Chopper WebShell ChopShop module:
+.. _webshell_chopper_decode:
 
 webshell_chopper_decode
 ========
