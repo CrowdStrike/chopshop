@@ -3,7 +3,7 @@ owa_ssl_decoder
 
 The Outlook Web Application traffic parser will take a PCAP with OWA session data to extract 
 
-* Username and Password
+* Username and Password used for OWA session
 * Emails Accessed (timestamp, subject, senders, recipients)
 * Emails Searched (timestamp, subject)
 
